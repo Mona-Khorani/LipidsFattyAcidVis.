@@ -1,0 +1,131 @@
+---
+title: "lipidomeR"
+author: "Mona Khorani"
+date: "February 2, 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#-------------------------------------------------------------
+# Load the humanlipidome data set.
+```{r}
+install.packages( "lipidomeR" )
+library( "lipidomeR" )
+```
+#cancerlipidome
+# Load the cancerlipidome data set.
+```{r}
+
+# Convert the data into wide format, where each lipid is one column and
+# each sample is one row.
+dataa=read.csv("CFC-Wide-NRTRepRem145-HipCortxMixPosNTIAPareLogProg08Ap2022.csv")
+Names=read.csv("CFC-Names-NRTRepRem145-HipCortxMixPosNTIAPareLogProg08Ap2022.csv")
+```
+# Inspect the data frame.
+# View( cancerlipidome.wide )
+# Create a mapping of the lipid names.
+```{r}
+names.mapping <- map_lipid_names(x = unique(Names$Names ) )
+```
+
+
+# Compute the regression models.
+```{r}
+result.limma <-
+   compute_models_with_limma(
+       x = dataa,
+       dependent.variables = names.mapping$"Name.checked",
+       independent.variables = c( "Group" )
+   )
+```
+
+## Fitting models: ~ Group
+
+```{r}
+png(file="Fig1.tiff", width=3000, height=1300, res=350)
+
+figure.output <-
+   heatmap_lipidome_from_limma(
+       x = result.limma$"model",
+       names.mapping = names.mapping,
+       axis.x.carbons = TRUE,
+       class.facet = "wrap",
+       plot.all = TRUE,
+       plot.individual = TRUE,
+       print.figure = TRUE,
+       scales = "free",
+       space = "free",
+       wrap.contrast.name = TRUE,class.subset = c('PE', 'PC', 'DG')
+   )
+print( figure.output[[ "GroupTreatment" ]] )
+graphics.off()
+```
+# Create the figure of all lipids and factors.
+```{r}
+png(file="Fig2.tiff", width=3500, height=3500, res=350)
+
+figure.output <-
+   heatmap_lipidome_from_limma(
+       x = result.limma$"model",
+       names.mapping = names.mapping,
+       axis.x.carbons = FALSE,
+       class.facet = "wrap",
+       plot.all = TRUE,
+       plot.individual = FALSE,
+       print.figure = TRUE,
+       scales = "fixed",
+       space = "fixed",
+       class.subset = c('DG','TG', 'PG', 'MG'),
+       range.min.N.double.bonds = 0,
+       p.val.label.bg.size=2
+       
+   )
+print( figure.output[[ "GroupTreatment" ]] )
+graphics.off()
+```
+
+
+```{r}
+png(file="Fig3.tiff", width=3700, height=3700, res=400)
+
+figure.output <-
+   heatmap_lipidome_from_limma(
+       x = result.limma$"model",
+       names.mapping = names.mapping,
+       axis.x.carbons = FALSE,
+       class.facet = "wrap",
+       plot.all = TRUE,
+       plot.individual = FALSE,
+       print.figure = TRUE,
+       scales = "fixed",
+       space = "fixed",
+       wrap.contrast.name = TRUE,
+       class.subset = c('Cer','Cer-2OH', 'Cer-3OH', 'HexCer', 'HexCer-2OH'),
+       range.min.N.double.bonds = 0,
+   )
+print( figure.output[[ "GroupTreatment" ]] )
+graphics.off()
+```
+
+# Create factor-specific figures.
+```{r}
+png(file="Fig f2-3.tiff", width=4000, height=4000, res=450)
+
+figure.output <-
+   heatmap_lipidome_from_limma(
+       x = result.limma$"model",
+       names.mapping = names.mapping,
+       axis.x.carbons = TRUE,
+       class.facet = "wrap",
+       plot.all = TRUE,
+       plot.individual = TRUE,
+       scales = "fixed",
+       space = "fixed",
+       range.min.N.double.bonds = 0
+   )
+print( figure.output[[ "GroupTreatment" ]] )
+graphics.off()
+   
+```
